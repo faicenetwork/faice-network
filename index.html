@@ -54,9 +54,9 @@ input{
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-
 const supabaseUrl = "https://asffipyydzbnduofkyry.supabase.co";
 const supabaseKey = "sb_publishable_76BdsgUiJe9i7lINTkr6sQ_J7JFAOln";
+    
 const supabase = window.supabase.createClient(
   supabaseUrl,
   supabaseKey
@@ -85,32 +85,23 @@ async function cargarPreguntas(){
     `).join("");
 }
 
-async function publicar(){
+async function publicar() {
 
     const texto = document.getElementById("pregunta").value;
 
-    if(!texto){
-        alert("Escribe una pregunta");
-        return;
-    }
+    if(!texto) return;
 
     const { error } = await supabase
-        .from("preguntas")
-        .insert([
-            { texto: texto }
-        ]);
+      .from("preguntas")
+      .insert([{ texto }]);
 
     if(error){
-        console.error(error);
-        alert("Error al guardar");
+        alert(error.message);
         return;
     }
 
-    document.getElementById("titulo").textContent = texto;
     document.getElementById("pregunta").value = "";
-
     cargarPreguntas();
-
     alert("Pregunta publicada");
 }
 
