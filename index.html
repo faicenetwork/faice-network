@@ -95,9 +95,34 @@ function compartir(){
  navigator.clipboard.writeText(location.href);
  alert('Enlace copiado');
 }
-function publicar(){
- titulo.textContent=pregunta.value;
+<script>
+async function publicar() {
+
+  const texto = document.getElementById("pregunta").value;
+
+  if(!texto){
+    alert("Escribe una pregunta");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("preguntas")
+    .insert([
+      { texto: texto }
+    ]);
+
+  if(error){
+    console.error(error);
+    alert("Error al guardar");
+    return;
+  }
+
+  document.getElementById("titulo").textContent = texto;
+  document.getElementById("pregunta").value = "";
+
+  alert("Pregunta publicada");
 }
+</script>
 </script>
 </body>
 </html>
