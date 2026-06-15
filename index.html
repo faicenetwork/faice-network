@@ -4,151 +4,287 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>fAIce.network MVP</title>
+
 <style>
-body{font-family:Arial,sans-serif;background:#111827;color:white;margin:0;display:grid;grid-template-columns:220px 1fr 300px}
-aside, .right{padding:15px;background:#1f2937}
-main{padding:20px}
-.card{background:#374151;padding:15px;border-radius:10px}
-button{padding:8px 12px;margin:4px;cursor:pointer}
-input{width:100%;padding:10px}
-.ai{background:#4b5563;padding:10px;margin:10px 0;border-radius:8px}
-</style>
-</head>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-async function cargarPreguntas(){
-
-  const { data, error } = await supabase
-    .from("preguntas")
-    .select("*")
-    .order("id",{ascending:false})
-    .limit(20);
-
-  if(error){
-    console.error(error);
-    return;
-  }
-
-  const feed=document.getElementById("feed");
-
-  feed.innerHTML=data.map(p=>`
-    <div class="ai">
-      ${p.texto}
-    </div>
-  `).join("");
+body{
+    font-family:Arial,sans-serif;
+    background:#111827;
+    color:white;
+    margin:0;
+    display:grid;
+    grid-template-columns:220px 1fr 300px;
 }
 
-cargarPreguntas();
+aside,.right{
+    padding:15px;
+    background:#1f2937;
+}
+
+main{
+    padding:20px;
+}
+
+.card{
+    background:#374151;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+button{
+    padding:8px 12px;
+    margin:4px;
+    cursor:pointer;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    box-sizing:border-box;
+}
+
+.ai{
+    background:#4b5563;
+    padding:10px;
+    margin:10px 0;
+    border-radius:8px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-const supabaseUrl = 'https://asffipyydzbnduofkyry.supabase.co';
-const supabaseKey = 'sb_publishable_76BdsgUiJe9i7lINTkr6sQ_J7JFAOln';
+
+const supabaseUrl = "https://asffipyydzbnduofkyry.supabase.co";
+
+const supabaseKey = "sb_publishable_76BdsgUiJe9i7lINTkr6sQ_J7JFAOln";
+
 const supabase = window.supabase.createClient(
-  supabaseUrl,
-  supabaseKey
+    supabaseUrl,
+    supabaseKey
 );
+
+async function cargarPreguntas(){
+
+    const { data, error } = await supabase
+        .from("preguntas")
+        .select("*")
+        .order("id",{ascending:false})
+        .limit(20);
+
+    if(error){
+        console.error(error);
+        return;
+    }
+
+    const feed = document.getElementById("feed");
+
+    if(feed){
+        feed.innerHTML = data.map(p => `
+            <div class="ai">
+                ${p.texto}
+            </div>
+        `).join("");
+    }
+}
+
+async function publicar(){
+
+    const texto = document.getElementById("pregunta").value;
+
+    if(!texto){
+        alert("Escribe una pregunta");
+        return;
+    }
+
+    const { error } = await supabase
+        .from("preguntas")
+        .insert([
+            { texto: texto }
+        ]);
+
+    if(error){
+        console.error(error);
+        alert("Error al guardar");
+        return;
+    }
+
+    document.getElementById("titulo").textContent = texto;
+    document.getElementById("pregunta").value = "";
+
+    cargarPreguntas();
+
+    alert("Pregunta publicada");
+}
+
+function votar(id){
+
+    let e = document.getElementById(id);
+
+    e.textContent = parseInt(e.textContent) + 1;
+
+    actualizar();
+}
+
+function actualizar(){
+
+    let datos = [
+        ["ChatGPT", parseInt(document.getElementById("chatgpt").textContent)],
+        ["Gemini", parseInt(document.getElementById("gemini").textContent)],
+        ["Claude", parseInt(document.getElementById("claude").textContent)]
+    ];
+
+    datos.sort((a,b)=>b[1]-a[1]);
+
+    document.getElementById("ranking").innerHTML =
+        datos.map(x=>`${x[0]}: ${x[1]} votos`).join("<br>");
+}
+
+function compartir(){
+
+    navigator.clipboard.writeText(location.href);
+
+    alert("Enlace copiado");
+}
+
+window.onload = () => {
+
+    cargarPreguntas();
+
+    actualizar();
+};
+
 </script>
+
+</head>
+
 <body>
+
 <aside>
+
 <h2>fAIce.network</h2>
+
 <p>Preguntas</p>
- <div class="card" style="margin-top:15px">
+
+<div class="card">
 <h3>Últimas preguntas</h3>
-<div id="feed"></div>
+<div id="feed">Cargando...</div>
 </div>
+
 <p>Ranking IA</p>
-<p>Perfil (futuro)</p>
+<p>Perfil (Próximamente)</p>
+
 </aside>
 
 <main>
+
 <div class="card">
+
 <h2>Haz cualquier pregunta</h2>
-<input id="pregunta" placeholder="Escribe tu pregunta...">
-<button onclick="publicar()">Publicar</button>
+
+<input
+id="pregunta"
+placeholder="Escribe tu pregunta..."
+>
+
+<button onclick="publicar()">
+Publicar
+</button>
+
 </div>
 
-<div class="card" style="margin-top:15px">
-<h3 id="titulo">¿La IA reemplazará empleos?</h3>
+<div class="card">
+
+<h3 id="titulo">
+¿La IA reemplazará empleos?
+</h3>
 
 <div class="ai">
+
 <b>ChatGPT</b>
-<p>Transformará más empleos de los que eliminará.</p>
-<button onclick="votar('chatgpt')">👍 Votar <span id="chatgpt">0</span></button>
-<button onclick="compartir()">📤 Compartir</button>
+
+<p>
+Transformará más empleos de los que eliminará.
+</p>
+
+<button onclick="votar('chatgpt')">
+👍 Votar
+<span id="chatgpt">0</span>
+</button>
+
+<button onclick="compartir()">
+📤 Compartir
+</button>
+
 </div>
 
 <div class="ai">
+
 <b>Gemini</b>
-<p>El impacto dependerá del sector económico.</p>
-<button onclick="votar('gemini')">👍 Votar <span id="gemini">0</span></button>
-<button onclick="compartir()">📤 Compartir</button>
+
+<p>
+El impacto dependerá del sector económico.
+</p>
+
+<button onclick="votar('gemini')">
+👍 Votar
+<span id="gemini">0</span>
+</button>
+
+<button onclick="compartir()">
+📤 Compartir
+</button>
+
 </div>
 
 <div class="ai">
+
 <b>Claude</b>
-<p>La colaboración humano‑IA será la tendencia.</p>
-<button onclick="votar('claude')">👍 Votar <span id="claude">0</span></button>
-<button onclick="compartir()">📤 Compartir</button>
+
+<p>
+La colaboración humano-IA será la tendencia.
+</p>
+
+<button onclick="votar('claude')">
+👍 Votar
+<span id="claude">0</span>
+</button>
+
+<button onclick="compartir()">
+📤 Compartir
+</button>
+
 </div>
+
 </div>
+
 </main>
 
 <div class="right">
+
 <h3>📊 Estadísticas</h3>
-<div id="ranking">Sin votos aún</div>
 
-<hr>
-<h3>📰 Noticias</h3>
-<p><a href="https://news.google.com" target="_blank">Google News</a></p>
-
-<h3>🛒 Patrocinadores</h3>
-<p>Espacio para enlaces de afiliados de Mercado Libre.</p>
+<div id="ranking">
+Sin votos aún
 </div>
 
-<script>
-function votar(id){
- let e=document.getElementById(id);
- e.textContent=parseInt(e.textContent)+1;
- actualizar();
-}
-function actualizar(){
- let datos=[
- ['ChatGPT',parseInt(chatgpt.textContent)],
- ['Gemini',parseInt(gemini.textContent)],
- ['Claude',parseInt(claude.textContent)]
- ].sort((a,b)=>b[1]-a[1]);
- ranking.innerHTML=datos.map(x=>x[0]+': '+x[1]+' votos').join('<br>');
-}
-function compartir(){
- navigator.clipboard.writeText(location.href);
- alert('Enlace copiado');
-}
-<script>
-async function publicar() {
+<hr>
 
-  const texto = document.getElementById("pregunta").value;
+<h3>📰 Noticias</h3>
 
-  if(!texto){
-    alert("Escribe una pregunta");
-    return;
-  }
+<p>
+<a href="https://news.google.com" target="_blank">
+Google News
+</a>
+</p>
 
-  const { data, error } = await supabase
-    .from("preguntas")
-    .insert([
-      { texto: texto }
-    ]);
+<h3>🛒 Patrocinadores</h3>
 
-  if(error){
-    console.error(error);
-    alert("Error al guardar");
-    return;
-  }
+<p>
+Espacio para afiliados de Mercado Libre
+</p>
 
-  document.getElementById("titulo").textContent = texto;
-  document.getElementById("pregunta").value = "";
+</div>
 
-  alert("Pregunta publicada");
-}
-</script>
-</script>
 </body>
 </html>
