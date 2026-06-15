@@ -70,20 +70,19 @@ async function cargarPreguntas(){
         .order("id",{ascending:false})
         .limit(20);
 
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
     if(error){
-        console.error(error);
+        alert(error.message);
         return;
     }
 
     const feed = document.getElementById("feed");
 
-    if(feed){
-        feed.innerHTML = data.map(p => `
-            <div class="ai">
-                ${p.texto}
-            </div>
-        `).join("");
-    }
+    feed.innerHTML = data.map(p => `
+        <div class="ai">${p.texto}</div>
+    `).join("");
 }
 
 async function publicar(){
