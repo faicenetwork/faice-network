@@ -63,13 +63,13 @@ const supabase = window.supabase.createClient(
 );
 console.log("SUPABASE OK", supabase);
 
-async function cargarPreguntas(){
+async function cargarPreguntas() {
+
+    console.log("Conectando...");
 
     const { data, error } = await supabase
         .from("preguntas")
-        .select("*")
-        .order("id",{ascending:false})
-        .limit(20);
+        .select("*");
 
     console.log("DATA:", data);
     console.log("ERROR:", error);
@@ -79,11 +79,8 @@ async function cargarPreguntas(){
         return;
     }
 
-    const feed = document.getElementById("feed");
-
-    feed.innerHTML = data.map(p => `
-        <div class="ai">${p.texto}</div>
-    `).join("");
+    document.getElementById("feed").innerHTML =
+        JSON.stringify(data, null, 2);
 }
 
 async function publicar() {
