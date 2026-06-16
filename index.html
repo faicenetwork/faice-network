@@ -54,96 +54,27 @@ input{
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://asffipyydzbnduofkyry.supabase.co";
-const supabaseKey = "sb_publishable_76BdsgUiJe9i7lINTkr6sQ_J7JFAOln";
-        
+
 const supabase = window.supabase.createClient(
-  supabaseUrl,
-  supabaseKey
+  "https://asffipyydzbnduofkyry.supabase.co",
+  "sb_publishable_76BdsgUiJe9i7lINTkr6sQ_J7JFAOln"
 );
-console.log("SUPABASE OK", supabase);
 
-async function cargarPreguntas() {
+async function cargarPreguntas(){
 
-    console.log("Conectando...");
+  const { data, error } = await supabase
+    .from("preguntas")
+    .select("*");
 
-    const { data, error } = await supabase
-        .from("preguntas")
-        .select("*");
+  console.log(data, error);
 
-    console.log("DATA:", data);
-    console.log("ERROR:", error);
-
-    if(error){
-        alert(error.message);
-        return;
-    }
-
-    document.getElementById("feed").innerHTML =
-        JSON.stringify(data, null, 2);
-}
-
-async function publicar() {
-
-    const texto = document.getElementById("pregunta").value;
-
-    if(!texto) return;
-
-    const { error } = await supabase
-      .from("preguntas")
-      .insert([{ texto }]);
-
-    if(error){
-        alert(error.message);
-        return;
-    }
-
-    document.getElementById("pregunta").value = "";
-    cargarPreguntas();
-    alert("Pregunta publicada");
-}
-
-function votar(id){
-
-    let e = document.getElementById(id);
-
-    e.textContent = parseInt(e.textContent) + 1;
-
-    actualizar();
-}
-
-function actualizar(){
-
-    let datos = [
-        ["ChatGPT", parseInt(document.getElementById("chatgpt").textContent)],
-        ["Gemini", parseInt(document.getElementById("gemini").textContent)],
-        ["Claude", parseInt(document.getElementById("claude").textContent)]
-    ];
-
-    datos.sort((a,b)=>b[1]-a[1]);
-
-    document.getElementById("ranking").innerHTML =
-        datos.map(x=>`${x[0]}: ${x[1]} votos`).join("<br>");
-}
-
-function compartir(){
-
-    navigator.clipboard.writeText(location.href);
-
-    alert("Enlace copiado");
 }
 
 window.onload = () => {
-
-    cargarPreguntas();
-
-    actualizar();
+  console.log("PAGINA CARGADA");
+  cargarPreguntas();
 };
-window.onload = () => {
-    console.log("PAGINA CARGADA");
-    cargarPreguntas();
-    actualizar();
-};   
+
 </script>
     
 </head>
